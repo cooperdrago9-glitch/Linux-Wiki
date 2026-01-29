@@ -1,0 +1,268 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Linux Wiki</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <style>
+    body{font-family:system-ui,-apple-system,Segoe UI,sans-serif;margin:0;padding:2rem;background:#0f172a;color:#e5e7eb}
+    nav{display:flex;gap:1rem;margin-bottom:2rem;flex-wrap:wrap}
+    nav button{background:#020617;color:#e5e7eb;border:none;padding:.7rem 1.1rem;border-radius:.6rem;cursor:pointer}
+    nav button.active{background:#2563eb}
+    h1{font-size:2.3rem;margin-bottom:.3rem}
+    h2{margin-top:0}
+    p{color:#94a3b8;max-width:1000px}
+    input,select{margin:1rem .5rem 1rem 0;padding:.7rem 1rem;border-radius:.5rem;border:none;font-size:1rem}
+    table{width:100%;border-collapse:collapse;margin-top:1rem}
+    th,td{padding:.75rem;text-align:left;vertical-align:top}
+    th{background:#020617;position:sticky;top:0}
+    tr:nth-child(even){background:rgba(255,255,255,.03)}
+    code{background:#020617;padding:.2rem .4rem;border-radius:.25rem}
+    .hidden{display:none}
+    .badge{font-size:.75rem;padding:.15rem .4rem;border-radius:.3rem;margin-left:.4rem}
+    .warn{background:#7f1d1d;color:#fecaca}
+    .tag{background:#1e293b;color:#cbd5f5}
+    details{cursor:pointer}
+    .tabs{display:flex;flex-direction:column;gap:.75rem;max-width:300px}
+    .tabs button{background:#020617;border:none;color:#e5e7eb;padding:1rem 1.2rem;border-radius:.6rem;cursor:pointer;font-size:1.05rem;text-align:left}
+    .tabs button.active{background:#16a34a}
+    a{color:#60a5fa;text-decoration:none}
+    .grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:1rem;margin-top:1rem}
+    .card{background:#020617;padding:1rem;border-radius:.75rem}
+    footer{margin-top:3rem;font-size:.85rem;color:#64748b}
+  </style>
+</head>
+<body>
+
+<nav>
+  <button id="nav-commands" class="active">Commands</button>
+  <button id="nav-distros">Distributions</button>
+  <button id="nav-tasks">Common Tasks</button>
+  <button id="nav-choose">Choose a Distro</button>
+</nav>
+
+<!-- COMMANDS -->
+<section id="page-commands">
+  <h1>Linux Wiki</h1>
+  <p>The open reference for Linux commands, distributions, and system knowledge.</p>
+  <p><strong>Learn • Explore • Download • Master Linux</strong></p>
+
+  <input id="search" placeholder="Search commands…" />
+  <select id="categoryFilter"><option value="">All categories</option></select>
+
+  <table>
+    <thead><tr><th>Command</th><th>Description</th></tr></thead>
+    <tbody id="commandTable"></tbody>
+  </table>
+</section>
+
+<!-- DISTROS -->
+<section id="page-distros" class="hidden">
+  <h1>Linux Distributions</h1>
+  <p>Active Linux distributions with official downloads and metadata.</p>
+  <div style="display:flex;gap:2rem;align-items:flex-start;flex-wrap:wrap">
+    <div class="tabs" id="distroTabs"></div>
+    <div id="distroContent" style="flex:1"></div>
+  </div>
+</section>
+
+<!-- TASKS -->
+<section id="page-tasks" class="hidden">
+  <h1>Common Linux Tasks</h1>
+  <div class="grid" id="tasks"></div>
+</section>
+
+<!-- CHOOSE -->
+<section id="page-choose" class="hidden">
+  <h1>Which Distro Should I Choose?</h1>
+  <div class="grid">
+    <div class="card"><strong>Beginners</strong><p>Ubuntu, Linux Mint, Zorin OS</p></div>
+    <div class="card"><strong>Old Hardware</strong><p>MX Linux, Alpine Linux</p></div>
+    <div class="card"><strong>Servers</strong><p>Debian, Rocky Linux, AlmaLinux</p></div>
+    <div class="card"><strong>Security</strong><p>Kali Linux, Tails</p></div>
+    <div class="card"><strong>Power Users</strong><p>Arch Linux, Gentoo, NixOS</p></div>
+  </div>
+</section>
+
+<footer>
+  Linux Wiki • Offline-friendly • Version 1.0
+</footer>
+
+<script>
+// ---------------- COMMANDS ----------------
+const commands = [
+  // filesystem
+  {name:'ls',desc:'List directory contents.',cat:'filesystem',danger:false,ex:'ls -la'},
+  {name:'cp',desc:'Copy files and directories.',cat:'filesystem',danger:false,ex:'cp file1 file2'},
+  {name:'mv',desc:'Move or rename files.',cat:'filesystem',danger:false,ex:'mv old new'},
+  {name:'rm',desc:'Remove files or directories.',cat:'filesystem',danger:true,ex:'rm -rf folder'},
+  {name:'mkdir',desc:'Create directories.',cat:'filesystem',danger:false,ex:'mkdir newdir'},
+  {name:'rmdir',desc:'Remove empty directories.',cat:'filesystem',danger:false,ex:'rmdir dir'},
+  {name:'stat',desc:'Display file information.',cat:'filesystem',danger:false,ex:'stat file'},
+  {name:'du',desc:'Estimate file space usage.',cat:'filesystem',danger:false,ex:'du -sh *'},
+  {name:'df',desc:'Report filesystem disk space usage.',cat:'filesystem',danger:false,ex:'df -h'},
+
+  // text
+  {name:'cat',desc:'Concatenate and print files.',cat:'text',danger:false,ex:'cat file'},
+  {name:'less',desc:'View text files interactively.',cat:'text',danger:false,ex:'less file'},
+  {name:'more',desc:'Paged file viewer.',cat:'text',danger:false,ex:'more file'},
+  {name:'head',desc:'Output first part of files.',cat:'text',danger:false,ex:'head file'},
+  {name:'tail',desc:'Output last part of files.',cat:'text',danger:false,ex:'tail -f log'},
+  {name:'grep',desc:'Search text by pattern.',cat:'text',danger:false,ex:'grep -R "main" .'},
+  {name:'awk',desc:'Pattern scanning and processing.',cat:'text',danger:false,ex:"awk '{print $1}' file"},
+  {name:'sed',desc:'Stream editor for text.',cat:'text',danger:false,ex:'sed s/foo/bar/g file'},
+  {name:'wc',desc:'Word, line, character count.',cat:'text',danger:false,ex:'wc -l file'},
+
+  // process
+  {name:'ps',desc:'Report process status.',cat:'process',danger:false,ex:'ps aux'},
+  {name:'top',desc:'Display running processes.',cat:'process',danger:false,ex:'top'},
+  {name:'htop',desc:'Interactive process viewer.',cat:'process',danger:false,ex:'htop'},
+  {name:'kill',desc:'Send signals to processes.',cat:'process',danger:true,ex:'kill -9 PID'},
+  {name:'pkill',desc:'Kill processes by name.',cat:'process',danger:true,ex:'pkill firefox'},
+  {name:'nice',desc:'Run program with priority.',cat:'process',danger:false,ex:'nice -n 10 cmd'},
+
+  // disk
+  {name:'mount',desc:'Mount a filesystem.',cat:'disk',danger:true,ex:'mount /dev/sda1 /mnt'},
+  {name:'umount',desc:'Unmount a filesystem.',cat:'disk',danger:true,ex:'umount /mnt'},
+  {name:'lsblk',desc:'List block devices.',cat:'disk',danger:false,ex:'lsblk'},
+  {name:'blkid',desc:'Locate block device attributes.',cat:'disk',danger:false,ex:'blkid'},
+  {name:'dd',desc:'Low-level copy and convert.',cat:'disk',danger:true,ex:'dd if=a.iso of=/dev/sdX'},
+
+  // networking
+  {name:'ip',desc:'Show/manipulate routing and devices.',cat:'network',danger:false,ex:'ip a'},
+  {name:'ss',desc:'Socket statistics.',cat:'network',danger:false,ex:'ss -tulpn'},
+  {name:'ping',desc:'Send ICMP echo requests.',cat:'network',danger:false,ex:'ping google.com'},
+  {name:'curl',desc:'Transfer data from URLs.',cat:'network',danger:false,ex:'curl https://example.com'},
+  {name:'wget',desc:'Retrieve files via HTTP/FTP.',cat:'network',danger:false,ex:'wget url'},
+
+  // system
+  {name:'uname',desc:'Print system information.',cat:'system',danger:false,ex:'uname -a'},
+  {name:'uptime',desc:'System run time.',cat:'system',danger:false,ex:'uptime'},
+  {name:'free',desc:'Display memory usage.',cat:'system',danger:false,ex:'free -h'},
+  {name:'systemctl',desc:'Control systemd services.',cat:'system',danger:false,ex:'systemctl status ssh'},
+  {name:'journalctl',desc:'View system logs.',cat:'system',danger:false,ex:'journalctl -xe'},
+
+  // package managers
+  {name:'apt',desc:'Debian package manager.',cat:'package',danger:false,ex:'apt install vim'},
+  {name:'apt-get',desc:'Low-level APT tool.',cat:'package',danger:false,ex:'apt-get update'},
+  {name:'dnf',desc:'Fedora package manager.',cat:'package',danger:false,ex:'dnf install vim'},
+  {name:'pacman',desc:'Arch package manager.',cat:'package',danger:false,ex:'pacman -S vim'},
+  {name:'zypper',desc:'openSUSE package manager.',cat:'package',danger:false,ex:'zypper install vim'},
+
+  // users
+  {name:'whoami',desc:'Print effective username.',cat:'user',danger:false,ex:'whoami'},
+  {name:'id',desc:'Print user identity.',cat:'user',danger:false,ex:'id'},
+  {name:'useradd',desc:'Create a new user.',cat:'user',danger:true,ex:'useradd bob'},
+  {name:'passwd',desc:'Change user password.',cat:'user',danger:true,ex:'passwd bob'}
+];
+
+const table=document.getElementById('commandTable');
+const search=document.getElementById('search');
+const categoryFilter=document.getElementById('categoryFilter');
+
+[...new Set(commands.map(c=>c.cat))].forEach(c=>{
+  const o=document.createElement('option');o.value=c;o.textContent=c;categoryFilter.appendChild(o);
+});
+
+function renderCommands(){
+  const f=search.value.toLowerCase();
+  const cat=categoryFilter.value;
+  table.innerHTML='';
+  commands.filter(c=>(!f||c.name.includes(f)||c.desc.toLowerCase().includes(f))&&(!cat||c.cat===cat))
+  .forEach(c=>{
+    table.innerHTML+=`<tr><td><code>${c.name}</code>${c.danger?'<span class="badge warn">DANGEROUS</span>':''}<span class="badge tag">${c.cat}</span></td><td>${c.desc}<details><summary>Example</summary><pre><code>${c.ex}</code></pre></details></td></tr>`;
+  });
+}
+search.oninput=renderCommands;categoryFilter.onchange=renderCommands;renderCommands();
+
+// ---------------- DISTROS ----------------
+const distros={
+  'AlmaLinux':{base:'Red Hat',release:'Stable',difficulty:'★★☆☆☆',url:'https://almalinux.org/get-almalinux/'},
+  'Alpine Linux':{base:'Independent',release:'Stable',difficulty:'★★★☆☆',url:'https://alpinelinux.org/downloads/'},
+  'Arch Linux':{base:'Arch',release:'Rolling',difficulty:'★★★★★',url:'https://archlinux.org/download/'},
+  'Artix Linux':{base:'Arch',release:'Rolling',difficulty:'★★★★☆',url:'https://artixlinux.org/download.php'},
+  'Debian':{base:'Independent',release:'Stable',difficulty:'★★☆☆☆',url:'https://www.debian.org/distrib/'},
+  'EndeavourOS':{base:'Arch',release:'Rolling',difficulty:'★★★☆☆',url:'https://endeavouros.com/latest-release/'},
+  'Fedora':{base:'Red Hat',release:'Stable',difficulty:'★★☆☆☆',url:'https://fedoraproject.org/workstation/download/'},
+  'Gentoo':{base:'Independent',release:'Rolling',difficulty:'★★★★★',url:'https://www.gentoo.org/downloads/'},
+  'Kali Linux':{base:'Debian',release:'Rolling',difficulty:'★★★☆☆',url:'https://www.kali.org/get-kali/'},
+  'Linux Mint':{base:'Debian',release:'Stable',difficulty:'★☆☆☆☆',url:'https://linuxmint.com/download.php'},
+  'Manjaro':{base:'Arch',release:'Rolling',difficulty:'★★☆☆☆',url:'https://manjaro.org/download/'},
+  'MX Linux':{base:'Debian',release:'Stable',difficulty:'★☆☆☆☆',url:'https://mxlinux.org/download-links/'},
+  'NixOS':{base:'Independent',release:'Rolling',difficulty:'★★★★☆',url:'https://nixos.org/download.html'},
+  'openSUSE Leap':{base:'SUSE',release:'Stable',difficulty:'★★☆☆☆',url:'https://get.opensuse.org/leap/'},
+  'openSUSE Tumbleweed':{base:'SUSE',release:'Rolling',difficulty:'★★★☆☆',url:'https://get.opensuse.org/tumbleweed/'},
+  'Pop!_OS':{base:'Debian',release:'Stable',difficulty:'★☆☆☆☆',url:'https://pop.system76.com/'},
+  'Rocky Linux':{base:'Red Hat',release:'Stable',difficulty:'★★☆☆☆',url:'https://rockylinux.org/download'},
+  'Slackware':{base:'Independent',release:'Stable',difficulty:'★★★★☆',url:'http://www.slackware.com/getslack/'},
+  'Solus':{base:'Independent',release:'Rolling',difficulty:'★★☆☆☆',url:'https://getsol.us/download/'},
+  'Ubuntu':{base:'Debian',release:'LTS',difficulty:'★☆☆☆☆',url:'https://ubuntu.com/download'},
+  'Void Linux':{base:'Independent',release:'Rolling',difficulty:'★★★☆☆',url:'https://voidlinux.org/download/'}
+};
+
+const tabs=document.getElementById('distroTabs');
+const content=document.getElementById('distroContent');
+
+function showDistro(name){
+  [...tabs.children].forEach(b=>b.classList.remove('active'));
+  document.getElementById('tab-'+name).classList.add('active');
+  const d=distros[name];
+  content.innerHTML=`<h2>${name}</h2>
+    <p><strong>Base:</strong> ${d.base}<br><strong>Release:</strong> ${d.release}<br><strong>Difficulty:</strong> ${d.difficulty}</p>
+    <p><a href="${d.url}" target="_blank">Official Download</a></p>`;
+  content.scrollIntoView({behavior:'smooth',block:'start'});
+}
+
+Object.keys(distros).sort().forEach((n,i)=>{
+  const b=document.createElement('button');b.textContent=n;b.id='tab-'+n;b.onclick=()=>showDistro(n);
+  if(i===0)b.classList.add('active');tabs.appendChild(b);
+});
+showDistro(Object.keys(distros).sort()[0]);
+
+// ---------------- TASKS ----------------
+const taskData=[
+  {t:'Find large files',c:'du -ah / | sort -hr | head'},
+  {t:'Kill a process',c:'kill -9 PID'},
+  {t:'Check disk usage',c:'df -h'},
+  {t:'Find open ports',c:'ss -tulpn'},
+  {t:'Check memory usage',c:'free -h'},
+  {t:'See running processes',c:'ps aux'},
+  {t:'Monitor system live',c:'htop'},
+  {t:'Search for a file',c:'find / -name filename'},
+  {t:'Check IP address',c:'ip a'},
+  {t:'Download a file',c:'wget url'},
+  {t:'Extract tar archive',c:'tar -xvf file.tar'},
+  {t:'Check system uptime',c:'uptime'},
+  {t:'List block devices',c:'lsblk'},
+  {t:'View system logs',c:'journalctl -xe'},
+  {t:'Change file permissions',c:'chmod 755 file'},
+  {t:'Change file owner',c:'chown user:group file'},
+  {t:'Mount a drive',c:'mount /dev/sdb1 /mnt'},
+  {t:'Check kernel version',c:'uname -r'},
+  {t:'Show disk partitions',c:'fdisk -l'},
+  {t:'Test network latency',c:'ping google.com'}
+];
+const tasks=document.getElementById('tasks');
+taskData.forEach(x=>tasks.innerHTML+=`<div class="card"><strong>${x.t}</strong><pre><code>${x.c}</code></pre></div>`);
+
+// ---------------- NAV ----------------
+const nav={
+  commands:['nav-commands','page-commands'],
+  distros:['nav-distros','page-distros'],
+  tasks:['nav-tasks','page-tasks'],
+  choose:['nav-choose','page-choose']
+};
+Object.keys(nav).forEach(k=>{
+  const [btn,pg]=nav[k];
+  document.getElementById(btn).onclick=()=>{
+    Object.values(nav).forEach(([b,p])=>{
+      document.getElementById(b).classList.remove('active');
+      document.getElementById(p).classList.add('hidden');
+    });
+    document.getElementById(btn).classList.add('active');
+    document.getElementById(pg).classList.remove('hidden');
+  };
+});
+</script>
+</body>
+</html>
